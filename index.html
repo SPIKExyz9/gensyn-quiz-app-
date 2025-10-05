@@ -9,40 +9,42 @@
 <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
-  body { margin:0; font-family:'Orbitron',sans-serif; background:#0f0c29; overflow-x:hidden; color:white; }
-  canvas.background { position: fixed; top:0; left:0; z-index:-1; }
+  body { margin:0; font-family:'Orbitron',sans-serif; background:#ffffff; color:#000; }
   .container { max-width:700px; margin:auto; padding:15px; text-align:center; position:relative; }
-  h1,h2,p { text-shadow: 0 0 5px #0ff,0 0 10px #ff00ff; }
+  .logo { margin-bottom:15px; }
+  .logo img { width:120px; }
+  h1,h2,p { text-shadow:0 0 3px #00f,0 0 5px #0ff; font-weight:bold; }
   h1 { font-size:2em; color:#0ff; }
-  .logo { font-size:1.6em; font-weight:bold; margin-bottom:12px; color:#ff00ff; text-shadow:0 0 10px #ff00ff,0 0 20px #ff0; }
-  .question-box, .score-box { background: rgba(255,255,255,0.05); padding:15px; margin:15px 0; border-radius:15px; box-shadow:0 0 15px #0ff; animation:fadeIn 0.8s ease-in-out; }
+  .question-box, .score-box { background: rgba(0,0,0,0.05); padding:15px; margin:15px 0; border-radius:15px; box-shadow:0 0 15px #0ff; }
   .options button, .share-buttons button, .reset-button, .replay-button {
     display:block; width:100%; margin:10px 0; padding:12px; font-size:1em; border-radius:10px; border:none; font-weight:bold; cursor:pointer;
-    background: linear-gradient(90deg,#ff00ff,#00ffff); color:#000; text-shadow:0 0 3px #fff;
-    box-shadow:0 0 8px #0ff,0 0 15px #f0f; transition:0.3s; animation:glow 1.8s infinite alternate;
-  }
+    background: linear-gradient(90deg,#ff00ff,#00ffff); color:#fff; text-shadow:0 0 2px #000;
+    box-shadow:0 0 8px #0ff,0 0 15px #f0f; transition:0.3s; }
   .options button:hover, .share-buttons button:hover, .reset-button:hover, .replay-button:hover { transform:scale(1.05); box-shadow:0 0 15px #0ff,0 0 30px #f0f; }
   .share-buttons button, .reset-button, .replay-button { width:auto; display:inline-block; margin:4px 8px; }
   .leaderboard { margin-top:15px; text-align:left; }
-  .leaderboard-item { font-size: 1em; text-shadow: 0 0 3px #0ff; margin: 3px 0; opacity:0; }
+  .leaderboard-item { font-size:1em; text-shadow:0 0 3px #0ff; margin:3px 0; opacity:0; }
   .rank-0 { font-weight:bold; text-shadow:0 0 8px #FFD700,0 0 15px #ff0; color:#FFD700; }
   .rank-1 { font-weight:bold; text-shadow:0 0 8px #C0C0C0,0 0 15px #0ff; color:#C0C0C0; }
   .rank-2 { font-weight:bold; text-shadow:0 0 8px #CD7F32,0 0 15px #f0f; color:#CD7F32; }
-  @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-  @keyframes glow { from {box-shadow:0 0 8px #0ff,0 0 15px #f0f;} to {box-shadow:0 0 15px #0ff,0 0 30px #f0f;} }
   @keyframes slideIn { from { transform: translateX(-100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
 </style>
 </head>
 <body>
-<canvas class="background" id="bgCanvas"></canvas>
-<div id="root"></div>
+<div class="container">
+  <div class="logo">
+    <img src="https://gensyn.ai/assets/logo.png" alt="Gensyn AI Logo">
+  </div>
+  <div id="root"></div>
+</div>
+
 <audio id="correct-sound" src="https://freesound.org/data/previews/337/337049_3233763-lq.mp3"></audio>
 <audio id="wrong-sound" src="https://freesound.org/data/previews/156/156031_2737820-lq.mp3"></audio>
 
 <script type="text/babel">
-const { useState, useRef, useEffect } = React;
+const { useState, useRef } = React;
 
-// Quiz data (same as previous 25 questions)
+// Quiz questions
 const quizData = [
   { q:"What is Gensyn primarily focused on?", options:["Gaming","Machine Intelligence Network","Social Media","E-commerce"], answer:1 },
   { q:"What does RL in Gensyn RL Swarm stand for?", options:["Random Learning","Reinforcement Learning","Real-time Logic","Recursive Loop"], answer:1 },
@@ -71,7 +73,67 @@ const quizData = [
   { q:"What is required to earn content creator rewards in Gensyn?", options:["Upload videos","Contribute AI data or content","Post memes","Share links"], answer:1 },
 ];
 
-// --- QuizApp component and optimized particle background ---
+function QuizApp(){
+  const [currentQ,setCurrentQ] = useState(0);
+  const [score,setScore] = useState(0);
+  const [showScore,setShowScore] = useState(false);
+  const [selected,setSelected] = useState(null);
+  const [leaderboard,setLeaderboard] = useState(JSON.parse(localStorage.getItem("gensynLeaderboard")||"[]"));
+  const correctSound = document.getElementById("correct-sound");
+  const wrongSound = document.getElementById("wrong-sound");
+
+  const handleOption=(i)=>{
+    setSelected(i);
+    const correct=i===quizData[currentQ].answer;
+    if(correct){ setScore(score+1); correctSound.play(); } else{ wrongSound.play(); }
+    setTimeout(()=>{
+      if(currentQ+1<quizData.length) setCurrentQ(currentQ+1); 
+      else { setShowScore(true); updateLeaderboard(score+(correct?1:0)); }
+      setSelected(null);
+    },600);
+  };
+
+  const updateLeaderboard=(finalScore)=>{
+    const name="Player"+Math.floor(Math.random()*1000);
+    const newBoard=[...leaderboard,{name,score:finalScore}].sort((a,b)=>b.score-a.score).slice(0,10);
+    setLeaderboard(newBoard);
+    localStorage.setItem("gensynLeaderboard",JSON.stringify(newBoard));
+  };
+
+  const replayQuiz=()=>{ setScore(0); setCurrentQ(0); setShowScore(false); setSelected(null); };
+  const resetStats=()=>{ localStorage.removeItem("gensynLeaderboard"); setLeaderboard([]); replayQuiz(); };
+
+  return(
+    <div>
+      {!showScore?(
+        <div className="question-box">
+          <h1>Question {currentQ+1}/{quizData.length}</h1>
+          <p>{quizData[currentQ].q}</p>
+          <div className="options">
+            {quizData[currentQ].options.map((opt,j)=><button key={j} onClick={()=>handleOption(j)} style={{opacity:selected!==null && selected!==j?0.6:1}}>{opt}</button>)}
+          </div>
+        </div>
+      ):(
+        <div className="score-box">
+          <h1>Your Score: {score}/{quizData.length}</h1>
+          <div className="share-buttons">
+            <button onClick={()=>alert("Telegram share!")}>Share on Telegram</button>
+            <button onClick={()=>alert("Twitter share!")}>Share on Twitter</button>
+            <button onClick={()=>alert("WhatsApp share!")}>Share on WhatsApp</button>
+          </div>
+          <button className="replay-button" onClick={replayQuiz}>Replay Quiz</button>
+          <button className="reset-button" onClick={resetStats}>Reset Leaderboard</button>
+          <div className="leaderboard">
+            <h2>Leaderboard (Top 10)</h2>
+            {leaderboard.map((p,i)=><p key={i} className={`leaderboard-item rank-${i}`} style={{animation:`slideIn 0.5s ease ${i*0.1}s forwards`}}>{i+1}. {p.name} - {p.score}</p>)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<QuizApp />);
 </script>
 </body>
 </html>
