@@ -20,7 +20,10 @@
 
     /* hex background using svg data-URI */
     body::before{
-      content:'';position:fixed;inset:0;opacity:0.18;pointer-events:none;background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400"><defs><pattern id="h" width="80" height="69" patternUnits="userSpaceOnUse" patternTransform="scale(1)"><path d="M40 0 L80 20 L80 49 L40 69 L0 49 L0 20 Z" fill="none" stroke="%23ff2fc6" stroke-opacity="0.12" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23h)"/></svg>');background-repeat:repeat;background-position:center center;mix-blend-mode:overlay;filter:blur(8px) hue-rotate(10deg)Spik    header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px}
+      content:'';position:fixed;inset:0;opacity:0.18;pointer-events:none;background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400"><defs><pattern id="h" width="80" height="69" patternUnits="userSpaceOnUse" patternTransform="scale(1)"><path d="M40 0 L80 20 L80 49 L40 69 L0 49 L0 20 Z" fill="none" stroke="%23ff2fc6" stroke-opacity="0.12" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23h)"/></svg>');background-repeat:repeat;background-position:center center;mix-blend-mode:overlay;filter:blur(8px) hue-rotate(10deg)
+    }
+
+    header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px}
     .brand{display:flex;align-items:center;gap:12px}
     .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;box-shadow:0 6px 22px rgba(138,43,226,0.28)}
     .brand h1{margin:0;font-size:18px;letter-spacing:0.6px}
@@ -43,7 +46,8 @@
     .score{background:linear-gradient(90deg,var(--accent-2),var(--accent));padding:8px 12px;border-radius:8px;font-weight:700}
 
     .question{font-weight:600;margin:14px 4px}
-    .options{display:grid;gap:10px;margin-top:8px}
+
+.options{display:grid;gap:10px;margin-top:8px}
     .opt{padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:linear-gradient(180deg, rgba(0,0,0,0.2), rgba(255,255,255,0.01));cursor:pointer;transition:all .18s ease;position:relative}
     .opt:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.5)}
     .opt.selected{outline:3px solid rgba(138,43,226,0.24)}
@@ -173,7 +177,8 @@ const QUESTIONS = [
   {q:"GenSyn aims to make AI compute:", opts:["Centralized","Expensive","Accessible and verifiable","Confidential and hidden"], a:2},
   {q:"Which field combines most closely with GenSyn’s technology?", opts:["Blockchain + AI","Psychology + AI","Chemistry + AI","Neuroscience + AI"], a:0},
   {q:"Which component of GenSyn allows payment and incentive coordination?", opts:["The scheduler","The blockchain ledger","The compiler","The neural optimizer"], a:1},
-  {q:"What does GenSyn’s “open marketplace” model mean?", opts:["Anyone can buy/sell compute power","Only partners can use the system","All compute is free","Computation happens manually"], a:0},
+
+{q:"What does GenSyn’s “open marketplace” model mean?", opts:["Anyone can buy/sell compute power","Only partners can use the system","All compute is free","Computation happens manually"], a:0},
   {q:"How does GenSyn increase transparency in AI training?", opts:["Through cryptographic proof of computation","Through screenshots","By emailing logs to users","Using manual inspectors"], a:0},
   {q:"GenSyn helps researchers by:", opts:["Restricting access to compute","Lowering entry barriers for AI model training","Removing all data","Offering fixed hardware only"], a:1},
   {q:"Which of the following best describes GenSyn’s mission?", opts:["To control AI compute","To decentralize and verify AI compute","To sell GPUs","To build social networks"], a:1},
@@ -190,18 +195,18 @@ const progress = document.getElementById('progress');
 
 function render(){
   const Q = QUESTIONS[state.idx];
-  quizFrame.innerHTML = `
+  quizFrame.innerHTML = 
     <div class="question">${state.idx+1}. ${escapeHtml(Q.q)}</div>
     <div class="options" id="opts">
-      ${Q.opts.map((o,i)=>`<div class="opt" data-i="${i}"><div>${String.fromCharCode(65+i)}. ${escapeHtml(o)}</div></div>`).join('')}
+      ${Q.opts.map((o,i)=><div class="opt" data-i="${i}"><div>${String.fromCharCode(65+i)}. ${escapeHtml(o)}</div></div>).join('')}
     </div>
-  `;
-  progress.textContent = `${state.idx+1} / ${QUESTIONS.length}`;
+  ;
+  progress.textContent = ${state.idx+1} / ${QUESTIONS.length};
   // highlight selected
   const opts = document.querySelectorAll('.opt');
   opts.forEach(o=>{o.addEventListener('click',()=>{selectOption(parseInt(o.dataset.i));});});
   if(state.answers[state.idx]!==null){
-    const el = document.querySelector(`.opt[data-i='${state.answers[state.idx]}']`);
+    const el = document.querySelector(.opt[data-i='${state.answers[state.idx]}']);
     if(el) el.classList.add('selected');
   }
 }
@@ -209,7 +214,7 @@ function render(){
 function selectOption(i){
   state.answers[state.idx]=i;
   document.querySelectorAll('.opt').forEach(x=>x.classList.remove('selected'));
-  const el = document.querySelector(`.opt[data-i='${i}']`); if(el) el.classList.add('selected');
+  const el = document.querySelector(.opt[data-i='${i}']); if(el) el.classList.add('selected');
 }
 
 function score(){
@@ -217,7 +222,7 @@ function score(){
   return s;
 }
 
-function updateScoreBadge(){ scoreBadge.textContent = `Score: ${score()} / ${QUESTIONS.length}`; }
+function updateScoreBadge(){ scoreBadge.textContent = Score: ${score()} / ${QUESTIONS.length}; }
 
 // navigation
 document.getElementById('next').addEventListener('click',()=>{
@@ -231,8 +236,8 @@ document.getElementById('prev').addEventListener('click',()=>{
 function finish(){
   const s = score();
   const pct = Math.round(100 * s / QUESTIONS.length);
-  document.getElementById('resultTitle').textContent = `You scored ${s} / ${QUESTIONS.length} (${pct}%)`;
-  document.getElementById('resultText').innerHTML = `Correct: ${s}<br>Wrong: ${QUESTIONS.length - s}<br>Winning rate: ${pct}%`;
+  document.getElementById('resultTitle').textContent = You scored ${s} / ${QUESTIONS.length} (${pct}%);
+  document.getElementById('resultText').innerHTML = Correct: ${s}<br>Wrong: ${QUESTIONS.length - s}<br>Winning rate: ${pct}%;
   document.getElementById('resultModal').classList.add('show');
   playWinSound(pct>=70);
   fireConfetti(pct>=70 ? 180 : 60);
@@ -250,11 +255,11 @@ document.getElementById('startBtn').addEventListener('click',()=>{
 // share
 function shareTo(platform){
   const s = score(); const pct = Math.round(100*s/QUESTIONS.length);
-  const text = encodeURIComponent(`I scored ${s}/${QUESTIONS.length} (${pct}%) on the Gensyn X SpikeXYZ quiz! Try it: `);
+  const text = encodeURIComponent(I scored ${s}/${QUESTIONS.length} (${pct}%) on the Gensyn X SpikeXYZ quiz! Try it: );
   const url = encodeURIComponent(location.href);
-  if(platform==='tg') window.open(`https://t.me/share/url?url=${url}&text=${text}`,'_blank');
-  if(platform==='tw') window.open(`https://twitter.com/intent/tweet?text=${text}%20${url}`,'_blank');
-  if(platform==='wa') window.open(`https://api.whatsapp.com/send?text=${text}%20${url}`,'_blank');
+  if(platform==='tg') window.open(https://t.me/share/url?url=${url}&text=${text},'_blank');
+  if(platform==='tw') window.open(https://twitter.com/intent/tweet?text=${text}%20${url},'_blank');
+  if(platform==='wa') window.open(https://api.whatsapp.com/send?text=${text}%20${url},'_blank');
 }
 
 document.getElementById('shareTelegram').addEventListener('click',()=>shareTo('tg'));
@@ -274,7 +279,7 @@ document.getElementById('saveScore').addEventListener('click',()=>{
 // open leaderboard
 document.getElementById('openLeaderboard').addEventListener('click',(e)=>{e.preventDefault(); showLeaderboard();});
 function showLeaderboard(){ const lb = loadLB(); const wrap = document.getElementById('leaderboardList'); wrap.innerHTML=''; if(lb.length===0) wrap.innerHTML='<div class="small">No scores yet. Play and save your score!</div>';
-  lb.forEach((r,idx)=>{ const el = document.createElement('div'); el.className='row'; el.innerHTML=`<div>${idx+1}. ${escapeHtml(r.name)}</div><div>${r.score}/${QUESTIONS.length} • ${r.pct}%</div>`; wrap.appendChild(el);}); document.getElementById('leaderboardModal').classList.add('show'); }
+  lb.forEach((r,idx)=>{ const el = document.createElement('div'); el.className='row'; el.innerHTML=<div>${idx+1}. ${escapeHtml(r.name)}</div><div>${r.score}/${QUESTIONS.length} • ${r.pct}%</div>; wrap.appendChild(el);}); document.getElementById('leaderboardModal').classList.add('show'); }
 
 document.getElementById('closeLb').addEventListener('click',()=>{document.getElementById('leaderboardModal').classList.remove('show');});
 
@@ -298,6 +303,7 @@ function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}
 addEventListener('resize',resize); resize();
 function fireConfetti(n){particles=[]; for(let i=0;i<n;i++){particles.push({x:W/2,y:H/3 + Math.random()*40,vx:(Math.random()-0.5)*8,vy:Math.random()*6+2,size:Math.random()*6+3,rot:Math.random()*6,color:randColor()});} animate();}
 function randColor(){const arr=['#ff2fc6','#8a2be2','#4be1ff','#ffd166','#7cffb2'];return arr[Math.floor(Math.random()*arr.length)];}
+
 let animId=null; function animate(){ if(animId) cancelAnimationFrame(animId); function frame(){ctx.clearRect(0,0,W,H); for(let p of particles){p.x+=p.vx; p.y+=p.vy; p.vy+=0.25; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size); ctx.restore();} particles = particles.filter(p=>p.y < H+50); if(particles.length>0) animId=requestAnimationFrame(frame); else cancelAnimationFrame(animId);} frame();}
 
 // audio using WebAudio API
